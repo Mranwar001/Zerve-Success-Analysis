@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zerve Success Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --text: #f8fafc;
+            --success: #22c55e;
+            --warn: #eab308;
+            --error: #ef4444;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { font-weight: 800; font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--accent); }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 40px;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        .card h3 { margin-top: 0; border-bottom: 2px solid #334155; padding-bottom: 12px; }
+        .score-bar {
+            background: #334155;
+            height: 12px;
+            border-radius: 6px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .score-fill { background: var(--accent); height: 100%; }
+        .predictor-form input {
+            width: 100%; padding: 12px; margin: 8px 0;
+            background: #0f172a; border: 1px solid #334155;
+            color: white; border-radius: 8px;
+        }
+        button {
+            width: 100%; padding: 14px; margin-top: 10px;
+            background: var(--accent); border: none;
+            color: #0f172a; font-weight: 800; border-radius: 8px;
+            cursor: pointer; transition: 0.2s;
+        }
+        button:hover { filter: brightness(1.1); }
+        #result-box {
+            margin-top: 20px; text-align: center;
+            font-size: 1.2rem; font-weight: 600;
+            display: none;
+        }
+        .stat-item { display: flex; justify-content: space-between; margin: 8px 0; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Zerve Success Analytics</h1>
+    <p>Data-driven behavioral insights from 176,000+ user events.</p>
+
+    <div class="grid">
+        <div class="card">
+            <h3>📈 Feature Importance</h3>
+            {% for feature, weight in insights.feature_importance.items() %}
+            <div class="stat-item">
+                <span>{{ feature.replace('_', ' ').title() }}</span>
+                <span>{{ (weight * 100)|round(1) }}%</span>
+            </div>
+            <div class="score-bar"><div class="score-fill" style="width: {{ weight * 100 }}%"></div></div>
+            {% endfor %}
+        </div>
+
+        <div class="card">
+            <h3>👥 Segment Performance</h3>
+            {% for segment, score in insights.segment_stats.items() %}
+            <div class="stat-item">
+                <span>{{ segment }}</span>
+                <span>{{ score|round(1) }}</span>
+            </div>
+            {% endfor %}
+            <p style="font-size: 0.8rem; margin-top: 20px; color: #94a3b8;">
+                * Median 'Aha' Threshold: <strong>{{ insights.aha_threshold|round(1) }} hrs</strong>
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>🔮 Success Predictor</h3>
+            <div class="predictor-form">
+                <input type="number" id="aha" placeholder="Aha Latency (Hours)">
+                <input type="number" id="qsr" placeholder="Quick Start Ratio (0.0 - 1.0)">
+                <input type="number" id="sessions" placeholder="Sessions in first 30 days">
+                <input type="number" id="div" placeholder="Unique features explored (1-13)">
+                <button onclick="predict()">Calculate Probability</button>
+            </div>
+            <div id="result-box">
+                Score: <span id="res-score"></span>/100<br>
+                <span id="res-status" style="font-size: 1.5rem;"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function predict() {
+            const data = {
+                aha: document.getElementById('aha').value,
+                qsr: document.getElementById('qsr').value,
+                sessions: document.getElementById('sessions').value,
+                div: document.getElementById('div').value
+            };
+            const res = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            document.getElementById('result-box').style.display = 'block';
+            document.getElementById('res-score').innerText = result.score;
+            document.getElementById('res-status').innerText = result.status;
+            document.getElementById('res-status').style.color = result.score > 80 ? '#22c55e' : (result.score > 50 ? '#eab308' : '#ef4444');
+        }
+    </script>
+</body>
+</html>

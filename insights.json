@@ -1,0 +1,17 @@
+{
+    "feature_importance": {
+        "total_sessions": 0.9204433303683875,
+        "aha_latency_hrs": 0.04078779712106383,
+        "quick_start_ratio": 0.021082229773736243,
+        "unique_event_types": 0.012538692978576906,
+        "collab_ratio": 0.005147949758235456,
+        "avg_session_intensity": 0.0
+    },
+    "segment_stats": {
+        "Collaborative Experts": 3.74,
+        "Curious Explorers": 74.51223529411764,
+        "Power Builders": 88.39372093023256,
+        "Silent Drop-offs": 31.62846153846154
+    },
+    "aha_threshold": 0.0
+}
